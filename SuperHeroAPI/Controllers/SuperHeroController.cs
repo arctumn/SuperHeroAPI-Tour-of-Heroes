@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SuperHeroAPI.Controllers
 {
+
     [Route("api/v1/[controller]")]
     [ApiController]
     public class SuperHeroController : ControllerBase
     {
+        public const string ROUTE = "api/v1/SuperHero";
 
 
         private readonly DataContext _context;
@@ -21,19 +23,33 @@ namespace SuperHeroAPI.Controllers
         {
             return Ok(await _context.SuperHeroes.ToListAsync());
         }
-
-        [HttpGet("{id}")]
+   
+        [HttpGet("data/{id}")]
         public async Task<ActionResult<SuperHero>> GetById(int id)
         {
             var hero = await _context.SuperHeroes.FindAsync(id);
             return hero is null ? NotFound() : Ok(hero);
         }
+        [HttpGet("data/name/{name}")]
+        public async Task<ActionResult<SuperHero>> GetByName(string name)
+        {
+            var heroes = await _context.SuperHeroes.ToListAsync();
+            if (name is not "")
+            {
+                heroes = heroes
+                    .FindAll(hero => hero.Name
+                        .ToLower()
+                        .Contains(name.ToLower()))
+                    .ToList();
+            }
+            return heroes is null ? NotFound() : Ok(heroes);
+        }
         [HttpPost]
-        public async Task<ActionResult<List<SuperHero>>> AddHero(SuperHero hero)
+        public async Task<ActionResult<SuperHero>> AddHero(SuperHero hero)
         {
             _context.SuperHeroes.Add(hero);
             await _context.SaveChangesAsync();
-            return Ok(await _context.SuperHeroes.ToListAsync());
+            return Ok(hero);
         }
 
         [HttpPut]
