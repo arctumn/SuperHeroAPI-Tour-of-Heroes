@@ -34,7 +34,14 @@ namespace SuperHeroAPI.Controllers
         public async Task<ActionResult<SuperHero>> GetByName(string name)
         {
             var heroes = await _context.SuperHeroes.ToListAsync();
-            heroes = name is "" ? heroes : heroes.FindAll(hero => hero.Name.ToLower().Contains(name.ToLower())).ToList();
+            if (name is not "")
+            {
+                heroes = heroes
+                    .FindAll(hero => hero.Name
+                        .ToLower()
+                        .Contains(name.ToLower()))
+                    .ToList();
+            }
             return heroes is null ? NotFound() : Ok(heroes);
         }
         [HttpPost]
